@@ -17,8 +17,7 @@ while counter <= 10:
     msg_from_simulink = s.recvfrom(SIZE)
     data_simulink = msg_from_simulink[0]
     ip_address_simulink = msg_from_simulink[1]
-    print(data_simulink)
-    data_from_simulink = struct.unpack('ddd', data_simulink)
+    data_from_simulink = struct.unpack('d', data_simulink)
     print(data_from_simulink)
     # counter += 1
 

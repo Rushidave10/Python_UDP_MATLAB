@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import torch.nn as nn
 
 
@@ -34,3 +35,9 @@ def weights_and_bias(layer, bias=False):
     if bias:
         return model.state_dict()[f'{layer}.bias']
     return model.state_dict()[f'{layer}.weight']
+
+
+w = weights_and_bias(layer='layer1')
+print(type(w))
+print(type(w.numpy()))
+print(type(np.arange(0, 100, dtype=np.double).reshape(5, 20)))
