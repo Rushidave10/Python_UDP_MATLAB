@@ -31,11 +31,24 @@ def unpad(packet):
 def check(packet, nfrag):
     # Check if no. of rows equal no. of fragments.
     if len(packet) == nfrag:
+        print("Complete message recvd")
         packet = unpad(packet)
         return packet
     else:
         warnings.warn("Data Lost")
         pass
+
+
+def reassemble(packet):
+    new_packet = []
+    seq_register = [i[0] for i in packet]
+    sort_seq_regr = np.sort(seq_register)
+    for k in sort_seq_regr:
+        for i, j in enumerate(packet):
+            if j[0] == k:
+                new_packet[i] = j
+
+    return new_packet
 
 
 def extract_raw(packet):
@@ -58,6 +71,7 @@ while True:
 
         #  Extract original data
         og_msg = extract_raw(og_msg)
+
 
         #  Converting into 1D vector.
         oneD_msg = np.asarray(list(chain.from_iterable([j for j in og_msg])))
