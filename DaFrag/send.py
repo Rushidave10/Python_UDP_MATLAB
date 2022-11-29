@@ -9,14 +9,15 @@ data = np.arange(0, 50)
 print(data)
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
-socket_1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+socket_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
 def fragmentation(packet: np.ndarray, frag_max_size: int):
     num_frags = math.ceil(packet.nbytes / frag_max_size)
     pad_here = packet.nbytes % frag_max_size
+    pad_in_np = 0
     if pad_here != 0:
-        warnings.warn("Padding needed")
+        print("Padding needed")
         pad_in_np = (frag_max_size - pad_here) / 4  # One element in np.array is 4 bytes.
         packet = np.pad(packet, (0, int(pad_in_np)), mode='constant', constant_values=np.asarray(0))
     fragments = []
@@ -25,7 +26,8 @@ def fragmentation(packet: np.ndarray, frag_max_size: int):
     packet_in_bytes = bytes(packet)
     for i, j in enumerate(packet_in_bytes):
         if (i + 1) % frag_max_size == 0:
-            fragment = np.frombuffer(bytes(count) + bytes(np.array([num_frags])) + packet_in_bytes[offset:i + 1],
+            fragment = np.frombuffer(bytes(count) + bytes(np.array([num_frags])) +
+                                     bytes(np.array([int(pad_in_np)])) + packet_in_bytes[offset:i + 1],
                                      dtype=packet.dtype)
             print(f"Fragment : {fragment}")
             offset = i + 1
@@ -48,13 +50,15 @@ def send(msg, socket_name, max_size: int, port=None):
         print("Fragmentation needed.")
         packet_fragments, num_of_frag = fragmentation(msg, frag_max_size=max_size)
         # raise Exception(f"Packet size {msg.nbytes} bytes is too big.")
-    else:
-        packet_fragments = msg
 
-    # Send fragments one-by-one.
-    for i in range(num_of_frag):
-        socket_name.sendto(packet_fragments[i], (ip_address, port))
-        time.sleep(1 / 1000)  # Sleep for 1ms
+        # Send fragments one-by-one.
+        for i in range(num_of_frag):
+            socket_name.sendto(packet_fragments[i], (ip_address, port))
+            time.sleep(1e-3)  # Sleep for 1ms
+    else:
+        print("Fragmentation not needed.")
+        packet_fragments, num_of_frag = fragmentation(msg, frag_max_size=max_size)
+        socket_name.sendto(packet_fragments[0], (ip_address, port))
 
     # Print shape of final message
     row = len(packet_fragments)
@@ -69,4 +73,4 @@ def send(msg, socket_name, max_size: int, port=None):
 if __name__ == "__main__":
     max_size = 32
     print(f"Maximum size allowed for packet: {max_size} Bytes")
-    send(data, socket_name=socket_1, port=1234, max_size=max_size)
+    send(data, socket_name=socket_send, port=1234, max_size=max_size)
