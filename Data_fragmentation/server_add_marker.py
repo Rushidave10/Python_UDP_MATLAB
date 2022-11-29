@@ -2,6 +2,7 @@ import socket
 import struct
 import math
 import warnings
+import time
 import numpy as np
 
 data = np.arange(0, 50)
@@ -16,7 +17,7 @@ def fragmentation(packet: np.ndarray, frag_max_size: int):
     pad_here = packet.nbytes % frag_max_size
     if pad_here != 0:
         warnings.warn("Padding needed")
-        pad_in_np = (frag_max_size-pad_here)/4  # One element in np.array is 4 bytes.
+        pad_in_np = (frag_max_size - pad_here) / 4  # One element in np.array is 4 bytes.
         packet = np.pad(packet, (0, int(pad_in_np)), mode='constant', constant_values=np.asarray(0))
     fragments = []
     offset = 0
@@ -49,8 +50,11 @@ def send(msg, socket_name, max_size: int, port=None):
         # raise Exception(f"Packet size {msg.nbytes} bytes is too big.")
     else:
         packet_fragments = msg
+
+    # Send fragments one-by-one.
     for i in range(num_of_frag):
         socket_name.sendto(packet_fragments[i], (ip_address, port))
+        time.sleep(1 / 1000)  # Sleep for 1ms
 
     # Print shape of final message
     row = len(packet_fragments)
