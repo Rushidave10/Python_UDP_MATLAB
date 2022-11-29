@@ -5,7 +5,7 @@ import warnings
 import time
 import numpy as np
 
-data = np.arange(0, 50)
+data = np.arange(0, 100)
 print(data)
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)

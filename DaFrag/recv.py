@@ -77,7 +77,7 @@ while True:
         oneD_msg = np.asarray(list(chain.from_iterable([j for j in og_msg])))
         print(oneD_msg)
         print(f"The length of message is {oneD_msg.size} and size is {oneD_msg.nbytes} Bytes")
-
+        print(np.array_equal(og_msg, np.arange(0, 100)))
         if save:
             t = time.localtime()
             timestamp = time.strftime('%b-%d-%Y_%H%M', t)
