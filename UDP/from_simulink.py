@@ -1,8 +1,9 @@
-import sys, struct
 import socket
-import pickle
-import numpy as np
+import struct
+import logging
 import matplotlib.pyplot as plt
+import numpy as np
+import time
 
 SIZE = 1500
 hostname = socket.gethostname()
@@ -13,14 +14,24 @@ s.bind((hostname, 1111))
 # print(socket_send.gettimeout())
 # socket_send.settimeout(5.0)
 # print(socket_send.gettimeout())
-s.settimeout(10)
+s.settimeout(20)
 counter = 0
+# logging.basicConfig(datefmt="%H:%M:%S",
+#                     filename='data.log',
+#                     format='%(asctime)s:%(msecs)05d %(message)s',
+#                     level=logging.INFO,
+#                     )
 
-for i in range(1000):
+logging.basicConfig(datefmt="%H:%M:%S",
+                    filename='time.csv',
+                    format='%(asctime)s:%(msecs)03d',
+                    level=logging.INFO,
+                    )
+
+for i in range(int(1e6)):
     msg_from_simulink = s.recvfrom(SIZE)
     data_simulink = msg_from_simulink[0]
     ip_address_simulink = msg_from_simulink[1]
     data_from_simulink = struct.unpack('d', data_simulink)
-    plt.scatter(i, data_from_simulink)
-    plt.pause(0.001)
-plt.show()
+    data_from_simulink = np.array(data_from_simulink)
+    logging.info(data_from_simulink)
